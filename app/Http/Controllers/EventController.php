@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
@@ -52,10 +51,16 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Event $event)
-    {
-        //
-    }
+    public function show(\App\Models\Event $event)
+{
+   // Mengambil daftar kategori untuk keperluan menu footer
+    $categories = \App\Models\Category::all();
+    
+    // Me-render view dengan membawa data kategori dan data spesifik acara tersebut
+    $event->load('reviews.user');
+    return view('event-detail', compact('categories', 'event'));
+}
+
 
     /**
      * Show the form for editing the specified resource.
@@ -93,5 +98,25 @@ class EventController extends Controller
     {
         $event->delete();
         return redirect()->route('admin.events.index')->with('success', 'Data event berhasil dihapus secara permanen.');
+    }
+
+    /**
+     * Tampilkan E-Ticket milik pengguna yang sedang login
+     */
+    public function ticket()
+    {
+        $categories = \App\Models\Category::all();
+
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu untuk melihat tiket Anda.');
+        }
+
+        $tickets = \App\Models\Transaction::with('event')
+            ->where('customer_email', auth()->user()->email)
+            ->whereIn('status', ['success', 'settlement', 'used'])
+            ->latest()
+            ->get();
+
+        return view('ticket', compact('tickets', 'categories'));
     }
 }

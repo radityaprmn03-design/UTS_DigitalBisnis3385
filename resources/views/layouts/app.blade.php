@@ -18,6 +18,9 @@
             backdrop-filter: blur(10px);
         }
     </style>
+    <!-- PWA Config -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
 </head>
 
 <body class="bg-slate-50 text-slate-900">
@@ -36,11 +39,37 @@
             <a href="#" class="hover:text-indigo-600 transition">Kategori</a>
             <a href="#" class="hover:text-indigo-600 transition">Tentang Kami</a>
         </div>
-        <!-- <div class="flex gap-3">
-            <button class="px-5 py-2.5 rounded-xl font-semibold hover:bg-slate-200 transition">Login</button>
-            <button
-                class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">Daftar</button>
-        </div> -->
+        <div class="flex items-center gap-3">
+            @if(auth()->check())
+                @php
+                    $role = auth()->user()->role ?? 'user';
+                @endphp
+                @if(in_array($role, ['superadmin', 'admin']))
+                    <a href="{{ route('admin.dashboard') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                        <span>👑</span> Dashboard Admin
+                    </a>
+                @elseif(in_array($role, ['organizer', 'panitia']))
+                    <a href="{{ route('admin.dashboard') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                        <span>🎪</span> Panel Panitia
+                    </a>
+                @else
+                    <a href="{{ route('ticket') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                        <span>🎟️</span> Tiket Saya
+                    </a>
+                @endif
+
+                <form action="{{ route('admin.logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="px-4 py-2.5 text-slate-500 hover:text-rose-600 font-bold text-sm transition">
+                        Keluar
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                    <span>🔑</span> Login / Masuk
+                </a>
+            @endif
+        </div>
     </nav>
 
     @yield('content')
@@ -91,6 +120,18 @@
         </div>
     </footer>
 
+    <!-- Service Worker Script -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('PWA ServiceWorker registered with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('PWA ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
 </body>
 
 </html>

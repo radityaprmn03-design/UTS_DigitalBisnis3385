@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
+            // Foreign Key relasi one-to-many ke users (organizer)
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             // Foreign Key relasi one-to-many ke categories
             $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->string('title');

@@ -9,7 +9,7 @@
                 class="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold uppercase tracking-wider">#1
                 Event Platform</span>
             <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
-                Temukan & Pesan <span class="text-indigo-600">Tiket Event</span> Impianmu.
+                Temukan & Pesan <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Tiket Event</span> Impianmu.
             </h1>
             <p class="text-lg text-slate-500 max-w-lg leading-relaxed">
                 Dari konser musik hingga workshop teknologi, semua ada di genggamanmu. Pesan aman & cepat dengan
@@ -17,11 +17,11 @@
             </p>
             <div class="flex gap-4">
                 <a href="#events"
-                    class="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:scale-105 transition-transform">
+                    class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:shadow-indigo-300 hover:scale-105 transition-all">
                     Mulai Jelajah
                 </a>
-                <a href="#"
-                    class="px-8 py-4 border-2 border-slate-200 rounded-2xl font-bold text-lg hover:border-indigo-600 hover:text-indigo-600 transition">
+                <a href="#events"
+                    class="px-8 py-4 border-2 border-slate-200 bg-white text-slate-700 rounded-2xl font-bold text-lg hover:border-indigo-600 hover:text-indigo-600 transition shadow-sm">
                     Cara Pesan
                 </a>
             </div>
@@ -34,19 +34,19 @@
                 class="absolute -bottom-10 -right-10 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000">
             </div>
             <img src="assets/concert.png" alt="Concert"
-                class="rounded-[2rem] shadow-2xl relative z-10 w-full object-cover aspect-[4/5] object-center">
+                class="rounded-[2rem] shadow-2xl relative z-10 w-full object-cover aspect-[4/5] object-center border-4 border-white">
 
             <div class="absolute -bottom-6 -left-6 glass p-6 rounded-2xl shadow-xl z-20 border border-white">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                    <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-inner">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
                             </path>
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-500 font-bold uppercase">Terverifikasi</p>
-                        <p class="font-bold">Pembayaran Aman via Midtrans</p>
+                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Terverifikasi</p>
+                        <p class="font-extrabold text-slate-800">Pembayaran Aman via Midtrans</p>
                     </div>
                 </div>
             </div>
@@ -56,12 +56,12 @@
     <!-- Events Grid -->
     <section id="events" class="max-w-7xl mx-auto px-6 py-20">
              <!-- Blok Navigasi Filter Kategori -->
-   <div class="mb-8 flex gap-4 justify-center">
+   <div class="mb-12 flex flex-wrap gap-3 justify-center">
         <!-- Rujukan awal navigasi bebas bawaan -->
-        <a href="/" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-black transition">Semua Kategori</a><!-- Melakukan iterasi nama Tab Kategori dinamis saat jumlah data bertambah  -->
+        <a href="/" class="px-6 py-3 {{ request('category') ? 'bg-white text-slate-600 border border-slate-200 hover:border-indigo-600' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 font-bold' }} rounded-2xl font-bold transition-all text-sm">Semua Kategori</a>
         @foreach($categories as $cat)
             <a href="/?category={{ $cat->slug }}" 
-               class="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 rounded shadow-sm transition">
+               class="px-6 py-3 {{ request('category') === $cat->slug ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-white text-slate-600 border border-slate-200 hover:border-indigo-600 hover:text-indigo-600' }} rounded-2xl font-bold transition-all text-sm">
                 {{ $cat->name }}
             </a>
         @endforeach
@@ -72,8 +72,10 @@
         <div
             class="group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-hidden">
             <div class="relative overflow-hidden aspect-[3/4]">
-                <img src="https://placehold.co/200x600" alt="{{ $event->title }}"
-                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                <img src="{{ ($event->poster_path && Storage::disk('public')->exists($event->poster_path))
+                ? asset('storage/' . $event->poster_path)
+                     : 'https://placehold.co/200x600' }}" alt="{{ $event->title }}"
+                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                 <div
                     class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur rounded-lg text-xs font-bold uppercase text-indigo-600">
                     {{ $event->category->name }}</div>
@@ -89,8 +91,7 @@
                 </div>
                 <div class="flex justify-between items-center pt-4 border-t">
                     <span class="text-2xl font-black text-indigo-600">Rp {{ number_format($event->price, 0, ',', '.') }}</span>
-                    <a href="{{url('event/1')}}" class="px-5 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-600 hover:text-white transition">Lihat
-                        Detail</a>
+                    <a href="{{ route('events.show', $event->id) }}" class="px-5 py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-600 hover:text-white transition">Lihat Detail</a>
                 </div>
             </div>
         </div>
