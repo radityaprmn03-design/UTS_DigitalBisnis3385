@@ -4,6 +4,17 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
+// Force /tmp/storage and stderr logging for serverless/Linux environments BEFORE Application configuration
+if (file_exists('/tmp')) {
+    putenv('APP_STORAGE=/tmp/storage');
+    $_ENV['APP_STORAGE'] = '/tmp/storage';
+    $_SERVER['APP_STORAGE'] = '/tmp/storage';
+
+    putenv('LOG_CHANNEL=stderr');
+    $_ENV['LOG_CHANNEL'] = 'stderr';
+    $_SERVER['LOG_CHANNEL'] = 'stderr';
+}
+
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -27,9 +38,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->create();
 
-// Automatically use /tmp/storage for Linux/Vercel serverless environment
 if (file_exists('/tmp')) {
     $app->useStoragePath('/tmp/storage');
+    $app->instance('path.storage', '/tmp/storage');
 }
 
 return $app;
