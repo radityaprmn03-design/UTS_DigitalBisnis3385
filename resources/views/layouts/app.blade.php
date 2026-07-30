@@ -41,20 +41,16 @@
         </div>
         <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
             @if(auth()->check())
+                <a href="{{ route('ticket') }}" class="px-3 py-2 sm:px-4 sm:py-2 bg-indigo-50 text-indigo-600 rounded-xl font-bold hover:bg-indigo-100 transition text-xs sm:text-sm flex items-center gap-1">
+                    <span>🎟️</span> Tiket Saya
+                </a>
+
                 @php
                     $role = auth()->user()->role ?? 'user';
                 @endphp
-                @if(in_array($role, ['superadmin', 'admin']))
-                    <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
-                        <span>👑</span> Admin
-                    </a>
-                @elseif(in_array($role, ['organizer', 'panitia']))
-                    <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
-                        <span>🎪</span> Panitia
-                    </a>
-                @else
-                    <a href="{{ route('ticket') }}" class="px-3 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
-                        <span>🎟️</span> Tiket Saya
+                @if(in_array($role, ['superadmin', 'admin', 'organizer', 'panitia']))
+                    <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
+                        <span>👑</span> Dashboard
                     </a>
                 @endif
 
@@ -69,7 +65,7 @@
                     Masuk
                 </a>
                 <a href="{{ route('register') }}" class="px-3.5 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap">
-                    <span>✨</span> Daftar
+                    <span>✨</span> Daftar Akun
                 </a>
             @endif
         </div>
