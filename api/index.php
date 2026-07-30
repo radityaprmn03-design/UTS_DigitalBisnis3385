@@ -1,12 +1,9 @@
 <?php
 
-// 1. Clear any stale bootstrap cache files
-@unlink(__DIR__ . '/../bootstrap/cache/services.php');
-@unlink(__DIR__ . '/../bootstrap/cache/packages.php');
-@unlink(__DIR__ . '/../bootstrap/cache/config.php');
-@unlink(__DIR__ . '/../bootstrap/cache/routes.php');
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-// 2. Prepare writable storage directories in /tmp for Vercel Serverless environment
+// 1. Prepare storage directories in /tmp
 $storageDirs = [
     '/tmp/storage/app/public',
     '/tmp/storage/framework/cache/data',
@@ -21,7 +18,7 @@ foreach ($storageDirs as $dir) {
     }
 }
 
-// 3. Copy SQLite database template to /tmp if not already present
+// 2. Copy SQLite database template to /tmp if not already present
 if (!file_exists('/tmp/database.sqlite')) {
     if (file_exists(__DIR__ . '/../database/database.sqlite')) {
         copy(__DIR__ . '/../database/database.sqlite', '/tmp/database.sqlite');
@@ -30,14 +27,10 @@ if (!file_exists('/tmp/database.sqlite')) {
     }
 }
 
-// 4. Script environment fixes for Vercel Serverless routing
+// 3. Environment overrides
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
-$_SERVER['VERCEL'] = '1';
-$_ENV['VERCEL'] = '1';
 
-// 5. Force environment overrides for Serverless execution
-putenv('VERCEL=1');
 putenv('APP_STORAGE=/tmp/storage');
 putenv('APP_KEY=base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=');
 putenv('APP_ENV=production');
@@ -73,22 +66,16 @@ $_SERVER['SESSION_DRIVER'] = 'cookie';
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
 
-// 6. Bootstrap Laravel Application
+// 4. Autoload & Bootstrap Application
 require __DIR__ . '/../vendor/autoload.php';
 
 /** @var \Illuminate\Foundation\Application $app */
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-$app->register(\Illuminate\View\ViewServiceProvider::class);
+// 5. Handle HTTP Request using Kernel directly
+$kernel = $app->make(Kernel::class);
 
-try {
-    $request = \Illuminate\Http\Request::capture();
-    $response = $app->handleRequest($request);
-    $response->send();
-} catch (\Throwable $e) {
-    http_response_code(500);
-    header('Content-Type: text/plain');
-    echo "UNDERLYING EXCEPTION CLASS: " . get_class($e) . "\n";
-    echo "UNDERLYING EXCEPTION MSG: " . $e->getMessage() . "\n\n";
-    echo $e->getTraceAsString();
-}
+$request = Request::capture();
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);
