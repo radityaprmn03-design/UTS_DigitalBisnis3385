@@ -23,53 +23,53 @@
     <meta name="theme-color" content="#4f46e5">
 </head>
 
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden">
 
-    <!-- Navigation Header (Always Sticky Top & Visible) -->
+    <!-- Navigation Header (Responsive Mobile & Desktop) -->
     <nav id="navbar"
-        class="glass sticky top-4 z-50 mx-4 px-6 py-4 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center transition-all duration-300">
-        <a href="/" class="flex items-center gap-2">
+        class="glass sticky top-3 z-50 mx-2 sm:mx-4 px-3 sm:px-6 py-3 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center transition-all duration-300">
+        <a href="/" class="flex items-center gap-2 min-w-0">
             <div
-                class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                class="w-9 h-9 sm:w-10 sm:h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-lg sm:text-xl shrink-0">
                 AH</div>
-            <span class="text-xl font-bold tracking-tight">AmikomEventHub</span>
+            <span class="text-sm sm:text-xl font-bold tracking-tight truncate">AmikomEventHub</span>
         </a>
         <div class="hidden md:flex gap-8 font-medium">
             <a href="/#events" class="hover:text-indigo-600 transition">Jelajahi</a>
             <a href="/#categories" class="hover:text-indigo-600 transition">Kategori</a>
             <a href="/#about" class="hover:text-indigo-600 transition">Tentang Kami</a>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
             @if(auth()->check())
                 @php
                     $role = auth()->user()->role ?? 'user';
                 @endphp
                 @if(in_array($role, ['superadmin', 'admin']))
-                    <a href="{{ route('admin.dashboard') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
-                        <span>👑</span> Dashboard Admin
+                    <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
+                        <span>👑</span> Admin
                     </a>
                 @elseif(in_array($role, ['organizer', 'panitia']))
-                    <a href="{{ route('admin.dashboard') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
-                        <span>🎪</span> Panel Panitia
+                    <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
+                        <span>🎪</span> Panitia
                     </a>
                 @else
-                    <a href="{{ route('ticket') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                    <a href="{{ route('ticket') }}" class="px-3 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1">
                         <span>🎟️</span> Tiket Saya
                     </a>
                 @endif
 
                 <form action="{{ route('admin.logout') }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="px-4 py-2.5 text-slate-500 hover:text-rose-600 font-bold text-sm transition">
+                    <button type="submit" class="px-2.5 py-2 text-slate-500 hover:text-rose-600 font-bold text-xs sm:text-sm transition">
                         Keluar
                     </button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="px-4 py-2.5 text-indigo-600 hover:text-indigo-800 font-bold text-sm transition">
+                <a href="{{ route('login') }}" class="px-2.5 py-2 text-indigo-600 hover:text-indigo-800 font-bold text-xs sm:text-sm transition">
                     Masuk
                 </a>
-                <a href="{{ route('register') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
-                    <span>✨</span> Daftar Akun
+                <a href="{{ route('register') }}" class="px-3.5 py-2 sm:px-5 sm:py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-xs sm:text-sm flex items-center gap-1 whitespace-nowrap">
+                    <span>✨</span> Daftar
                 </a>
             @endif
         </div>
