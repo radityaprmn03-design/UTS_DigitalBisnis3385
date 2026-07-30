@@ -1,5 +1,11 @@
 <?php
 
+if (!extension_loaded('pdo_sqlite')) {
+    header('Content-Type: text/plain');
+    echo "ERROR: pdo_sqlite extension is not enabled in PHP on Vercel!";
+    exit;
+}
+
 // 1. Clear any stale bootstrap cache files
 @unlink(__DIR__ . '/../bootstrap/cache/services.php');
 @unlink(__DIR__ . '/../bootstrap/cache/packages.php');
