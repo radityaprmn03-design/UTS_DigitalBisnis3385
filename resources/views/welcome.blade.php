@@ -84,7 +84,7 @@
                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                     <div
                         class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur rounded-lg text-xs font-bold uppercase text-indigo-600">
-                        {{ $event->category->name }}</div>
+                        {{ $event->category->name ?? 'General' }}</div>
                 </div>
                 <div class="p-6">
                     <h3 class="text-xl font-bold mb-2 group-hover:text-indigo-600 transition">{{ $event->title }}</h3>
@@ -147,22 +147,51 @@
         </div>
     </section>
 
-    <!-- Trusted Partners Section -->
+    <!-- Trusted Partners Section (Redesigned & Premium) -->
     <section class="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
         <div class="text-center max-w-xl mx-auto mb-16">
             <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider mb-3">Kolaborasi Terbaik</span>
-            <h2 class="text-4xl font-extrabold text-slate-800 leading-tight">Partner AmikomEventHub</h2>
+            <h2 class="text-4xl font-extrabold text-slate-800 leading-tight">Partner & Sponsor Resmi</h2>
             <p class="text-sm text-slate-500 mt-2">Platform kami didukung oleh berbagai instansi, perusahaan, dan komunitas terpercaya di Indonesia.</p>
         </div>
 
-        <!-- Grid Partner Logos -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-items-center">
-            @foreach($partners as $partner)
-                <div class="w-full max-w-[150px] aspect-square bg-slate-50 rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:-translate-y-1 transition duration-300 group">
-                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-w-full max-h-[60px] object-contain filter grayscale group-hover:grayscale-0 transition duration-300 rounded" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=120&auto=format&fit=crop'">
-                    <span class="text-[10px] font-black text-slate-400 group-hover:text-slate-800 text-center mt-3 uppercase tracking-wider truncate w-full">{{ $partner->name }}</span>
-                </div>
-            @endforeach
+        <!-- Grid Partner Badges -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center justify-items-center">
+            @php
+                $defaultPartners = [
+                    ['name' => 'Universitas AMIKOM', 'icon' => '🎓', 'color' => 'from-indigo-500 to-purple-600'],
+                    ['name' => 'Midtrans Payment', 'icon' => '💳', 'color' => 'from-blue-500 to-cyan-500'],
+                    ['name' => 'Google Cloud', 'icon' => '☁️', 'color' => 'from-emerald-500 to-teal-600'],
+                    ['name' => 'Vercel Serverless', 'icon' => '🚀', 'color' => 'from-slate-800 to-slate-950'],
+                    ['name' => 'GitHub Education', 'icon' => '🐙', 'color' => 'from-purple-600 to-pink-600'],
+                    ['name' => 'Telkom Indonesia', 'icon' => '📡', 'color' => 'from-rose-500 to-red-600'],
+                ];
+            @endphp
+
+            @if(count($partners) > 0)
+                @foreach($partners as $index => $partner)
+                    @php
+                        $preset = $defaultPartners[$index % count($defaultPartners)];
+                    @endphp
+                    <div class="w-full bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-200/80 hover:border-indigo-500/40 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+                        <div class="w-14 h-14 bg-gradient-to-tr {{ $preset['color'] }} rounded-2xl flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
+                            {{ $preset['icon'] }}
+                        </div>
+                        <span class="text-xs font-extrabold text-slate-700 group-hover:text-indigo-600 text-center uppercase tracking-wide truncate w-full transition">{{ $partner->name }}</span>
+                        <span class="text-[10px] font-bold text-slate-400 mt-0.5">Verified Partner</span>
+                    </div>
+                @endforeach
+            @else
+                @foreach($defaultPartners as $preset)
+                    <div class="w-full bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-200/80 hover:border-indigo-500/40 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+                        <div class="w-14 h-14 bg-gradient-to-tr {{ $preset['color'] }} rounded-2xl flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
+                            {{ $preset['icon'] }}
+                        </div>
+                        <span class="text-xs font-extrabold text-slate-700 group-hover:text-indigo-600 text-center uppercase tracking-wide truncate w-full transition">{{ $preset['name'] }}</span>
+                        <span class="text-[10px] font-bold text-slate-400 mt-0.5">Official Partner</span>
+                    </div>
+                @endforeach
+            @endif
         </div>
     </section>
 
