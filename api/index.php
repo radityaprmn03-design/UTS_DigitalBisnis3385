@@ -2,6 +2,8 @@
 
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
 
 // 1. Prepare writable storage directories in /tmp for Vercel Serverless environment
 $storageDirs = [
@@ -74,7 +76,17 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 // Dynamically bind storage path to writable /tmp/storage directory
 $app->useStoragePath('/tmp/storage');
 
-// 6. Handle HTTP Request using Laravel Kernel
+// 6. Auto-migrate SQLite tables if not present on serverless container
+try {
+    if (!Schema::hasTable('categories')) {
+        Artisan::call('migrate', ['--force' => true]);
+        Artisan::call('db:seed', ['--force' => true]);
+    }
+} catch (\Throwable $e) {
+    error_log('Auto-migration note: ' . $e->getMessage());
+}
+
+// 7. Handle HTTP Request using Laravel Kernel
 $kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle(
