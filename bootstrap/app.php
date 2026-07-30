@@ -27,9 +27,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->create();
 
-// Dynamically set storage path to /tmp/storage if running on serverless Vercel or environment override
-if (isset($_SERVER['VERCEL']) || isset($_ENV['VERCEL']) || env('APP_STORAGE')) {
-    $app->useStoragePath($_ENV['APP_STORAGE'] ?? '/tmp/storage');
+// Automatically use /tmp/storage for Linux/Vercel serverless environment
+if (file_exists('/tmp')) {
+    $app->useStoragePath('/tmp/storage');
 }
 
 return $app;
