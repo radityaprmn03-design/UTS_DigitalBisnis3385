@@ -16,14 +16,11 @@ class HomeController extends Controller
         // 2. Ambil sekumpulan data Partner
         $partners = Partner::all();
 
-        // 3. Buat kueri dasar untuk mengambil event: 
-        // - Gunakan Eager loading `category`
-        // - Hanya tampilkan kegiatan dengan jadwal yang belum kedaluwarsa (>= hari ini)
+        // 3. Buat kueri dasar untuk mengambil event (Eager loading `category` dan tampilkan semua untuk kemudahan demo)
         $query = Event::with('category')
-                      ->where('date', '>=', now())
-                      ->orderBy('date', 'asc');
+                      ->orderBy('date', 'desc');
 
-        // 4. Filter query jika url memiliki parameter pencarian spesifik ?category=...
+        // 4. Filter query jika url memiliki parameter pencarian pencarian spesifik ?category=...
         if ($request->has('category') && $request->category != '') {
             // Saring berdasarkan relasi tabel rujukan melalui properti slug kategori.
             $query->whereHas('category', function ($q) use ($request) {
