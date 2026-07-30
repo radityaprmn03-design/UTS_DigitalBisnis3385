@@ -33,6 +33,13 @@
                 <input type="email" name="email" value="{{ old('email') }}" placeholder="nama@email.com" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium" required>
             </div>
             <div>
+                <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Daftar Sebagai (Pilihan Role)</label>
+                <select name="role" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium">
+                    <option value="user">🎫 Pembeli Tiket (Member)</option>
+                    <option value="organizer">🎪 Panitia / Penyelenggara Event</option>
+                </select>
+            </div>
+            <div>
                 <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Password</label>
                 <input type="password" name="password" placeholder="Minimal 6 karakter" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium" required>
             </div>

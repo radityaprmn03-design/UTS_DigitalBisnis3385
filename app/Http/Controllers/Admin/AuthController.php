@@ -46,18 +46,23 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'role' => ['nullable', 'string', 'in:user,organizer'],
         ]);
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'role' => 'user',
+            'role' => $validated['role'] ?? 'user',
         ]);
 
         Auth::login($user);
 
-        return redirect('/')->with('success', 'Akun berhasil terdaftar dan kamu sudah masuk!');
+        if (in_array($user->role, ['superadmin', 'admin', 'organizer', 'panitia'])) {
+            return redirect()->route('admin.dashboard')->with('success', 'Akun Panitia berhasil terdaftar!');
+        }
+
+        return redirect('/')->with('success', 'Akun berhasil terdaftar!');
     }
 
     // 5. Fungsi memroses Log Out (Keluar)
