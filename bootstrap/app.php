@@ -14,24 +14,8 @@ if (file_exists('/tmp')) {
     $_ENV['LOG_CHANNEL'] = 'stderr';
     $_SERVER['LOG_CHANNEL'] = 'stderr';
 
-    // Direct bootstrap cache files to writable /tmp
-    putenv('APP_SERVICES_CACHE=/tmp/storage/framework/services.php');
-    putenv('APP_PACKAGES_CACHE=/tmp/storage/framework/packages.php');
-    putenv('APP_CONFIG_CACHE=/tmp/storage/framework/config.php');
-    putenv('APP_ROUTES_CACHE=/tmp/storage/framework/routes.php');
-    putenv('APP_EVENTS_CACHE=/tmp/storage/framework/events.php');
-
-    $_ENV['APP_SERVICES_CACHE'] = '/tmp/storage/framework/services.php';
-    $_ENV['APP_PACKAGES_CACHE'] = '/tmp/storage/framework/packages.php';
-    $_ENV['APP_CONFIG_CACHE'] = '/tmp/storage/framework/config.php';
-    $_ENV['APP_ROUTES_CACHE'] = '/tmp/storage/framework/routes.php';
-    $_ENV['APP_EVENTS_CACHE'] = '/tmp/storage/framework/events.php';
-
-    $_SERVER['APP_SERVICES_CACHE'] = '/tmp/storage/framework/services.php';
-    $_SERVER['APP_PACKAGES_CACHE'] = '/tmp/storage/framework/packages.php';
-    $_SERVER['APP_CONFIG_CACHE'] = '/tmp/storage/framework/config.php';
-    $_SERVER['APP_ROUTES_CACHE'] = '/tmp/storage/framework/routes.php';
-    $_SERVER['APP_EVENTS_CACHE'] = '/tmp/storage/framework/events.php';
+    // Prepare writable bootstrap cache directory in /tmp
+    @mkdir('/tmp/bootstrap/cache', 0777, true);
 }
 
 $app = Application::configure(basePath: dirname(__DIR__))
@@ -59,7 +43,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
 if (file_exists('/tmp')) {
     $app->useStoragePath('/tmp/storage');
+    $app->useBootstrapPath('/tmp/bootstrap');
     $app->instance('path.storage', '/tmp/storage');
+    $app->instance('path.bootstrap', '/tmp/bootstrap');
 }
 
 return $app;

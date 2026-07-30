@@ -1,18 +1,16 @@
 <?php
 
-use Illuminate\Contracts\Http\Kernel;
-use Illuminate\Http\Request;
-
-// 1. Prepare storage directories in /tmp
-$storageDirs = [
+// 1. Prepare storage and bootstrap directories in /tmp for Vercel Serverless environment
+$directories = [
     '/tmp/storage/app/public',
     '/tmp/storage/framework/cache/data',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/framework/views',
     '/tmp/storage/logs',
+    '/tmp/bootstrap/cache',
 ];
 
-foreach ($storageDirs as $dir) {
+foreach ($directories as $dir) {
     if (!file_exists($dir)) {
         @mkdir($dir, 0777, true);
     }
@@ -27,10 +25,12 @@ if (!file_exists('/tmp/database.sqlite')) {
     }
 }
 
-// 3. Environment overrides
+// 3. Script environment fixes for Vercel Serverless routing
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
 
+// 4. Force environment overrides for Serverless execution
+putenv('VERCEL=1');
 putenv('APP_STORAGE=/tmp/storage');
 putenv('APP_KEY=base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=');
 putenv('APP_ENV=production');
@@ -66,27 +66,5 @@ $_SERVER['SESSION_DRIVER'] = 'cookie';
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
 
-// 4. Autoload & Bootstrap Application
-require __DIR__ . '/../vendor/autoload.php';
-
-/** @var \Illuminate\Foundation\Application $app */
-$app = require_once __DIR__ . '/../bootstrap/app.php';
-
-// Register Filesystem and View providers explicitly
-$app->register(\Illuminate\Filesystem\FilesystemServiceProvider::class);
-$app->register(\Illuminate\View\ViewServiceProvider::class);
-
-// 5. Handle HTTP Request using Kernel
-try {
-    $kernel = $app->make(Kernel::class);
-    $request = Request::capture();
-    $response = $kernel->handle($request);
-    $response->send();
-    $kernel->terminate($request, $response);
-} catch (\Throwable $e) {
-    http_response_code(500);
-    header('Content-Type: text/plain');
-    echo "UNDERLYING EXCEPTION CLASS: " . get_class($e) . "\n";
-    echo "UNDERLYING EXCEPTION MSG: " . $e->getMessage() . "\n\n";
-    echo $e->getTraceAsString();
-}
+// 5. Forward Vercel request to Laravel public/index.php
+require __DIR__ . '/../public/index.php';
