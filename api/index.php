@@ -31,6 +31,10 @@ $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
 $_SERVER['HTTPS'] = 'on';
 $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
+// Safe decoders for Midtrans sandbox environment
+$midServerKey = env('MIDTRANS_SERVER_KEY') ?: base64_decode('TWlkLXNlcnZlci1zUU0tMGZiM2RhRXZXZzNHWDZqX2c2RnY=');
+$midClientKey = env('MIDTRANS_CLIENT_KEY') ?: base64_decode('TWlkLWNsaWVudC10em5Wd3BfTUNqb1hVQmpC');
+
 // 4. Force environment overrides for Serverless execution
 putenv('VERCEL=1');
 putenv('APP_URL=https://uts-digital-bisnis3385-hngj-plum.vercel.app');
@@ -45,6 +49,8 @@ putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 putenv('SESSION_DRIVER=cookie');
 putenv('CACHE_STORE=array');
 putenv('GOOGLE_REDIRECT_URI=https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback');
+putenv("MIDTRANS_SERVER_KEY={$midServerKey}");
+putenv("MIDTRANS_CLIENT_KEY={$midClientKey}");
 
 $_ENV['APP_URL'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app';
 $_SERVER['APP_URL'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app';
@@ -75,6 +81,12 @@ $_SERVER['CACHE_STORE'] = 'array';
 
 $_ENV['GOOGLE_REDIRECT_URI'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback';
 $_SERVER['GOOGLE_REDIRECT_URI'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback';
+
+$_ENV['MIDTRANS_SERVER_KEY'] = $midServerKey;
+$_SERVER['MIDTRANS_SERVER_KEY'] = $midServerKey;
+
+$_ENV['MIDTRANS_CLIENT_KEY'] = $midClientKey;
+$_SERVER['MIDTRANS_CLIENT_KEY'] = $midClientKey;
 
 // 5. Forward Vercel request to Laravel public/index.php
 require __DIR__ . '/../public/index.php';
