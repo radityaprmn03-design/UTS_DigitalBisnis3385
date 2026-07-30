@@ -1,11 +1,5 @@
 <?php
 
-if (!extension_loaded('pdo_sqlite')) {
-    header('Content-Type: text/plain');
-    echo "ERROR: pdo_sqlite extension is not enabled in PHP on Vercel!";
-    exit;
-}
-
 // 1. Clear any stale bootstrap cache files
 @unlink(__DIR__ . '/../bootstrap/cache/services.php');
 @unlink(__DIR__ . '/../bootstrap/cache/packages.php');
@@ -79,5 +73,11 @@ $_SERVER['SESSION_DRIVER'] = 'cookie';
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
 
-// 6. Forward Vercel request to Laravel public/index.php
-require __DIR__ . '/../public/index.php';
+// 6. Forward Vercel request to Laravel public/index.php inside try-catch
+try {
+    require __DIR__ . '/../public/index.php';
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "VERCEL DEPLOYMENT EXCEPTION:\n" . $e->getMessage() . "\n\n" . $e->getTraceAsString();
+}
