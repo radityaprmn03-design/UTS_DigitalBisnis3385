@@ -25,9 +25,9 @@
 
 <body class="bg-slate-50 text-slate-900">
 
-    <!-- Navigation Header (Auto Hides on Scroll Down) -->
+    <!-- Navigation Header (Always Sticky Top & Visible) -->
     <nav id="navbar"
-        class="glass sticky top-4 z-50 mx-4 px-6 py-4 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center transition-transform duration-300">
+        class="glass sticky top-4 z-50 mx-4 px-6 py-4 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center transition-all duration-300">
         <a href="/" class="flex items-center gap-2">
             <div
                 class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
@@ -119,24 +119,8 @@
         </div>
     </footer>
 
-    <!-- Auto-hide Header JS & Service Worker Script -->
+    <!-- Service Worker Script -->
     <script>
-        // Smooth scroll hide/show header navbar
-        let lastScrollY = window.scrollY;
-        const navbar = document.getElementById('navbar');
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 80 && window.scrollY > lastScrollY) {
-                // Scroll Ke Bawah -> Sembunyikan Header
-                navbar.style.transform = 'translateY(-200%)';
-            } else {
-                // Scroll Ke Atas / Di Paling Atas -> Tampilkan Header
-                navbar.style.transform = 'translateY(0)';
-            }
-            lastScrollY = window.scrollY;
-        });
-
-        // PWA Register
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').then(function(registration) {
