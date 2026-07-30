@@ -34,9 +34,6 @@ try {
 
     // 4. Force environment overrides for Serverless execution
     putenv('APP_KEY=base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=');
-    $_ENV['APP_KEY'] = 'base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=';
-    $_SERVER['APP_KEY'] = 'base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=';
-
     putenv('APP_ENV=production');
     putenv('APP_DEBUG=true');
     putenv('LOG_CHANNEL=stderr');
@@ -45,6 +42,9 @@ try {
     putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
     putenv('SESSION_DRIVER=cookie');
     putenv('CACHE_STORE=array');
+
+    $_ENV['APP_KEY'] = 'base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=';
+    $_SERVER['APP_KEY'] = 'base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=';
 
     $_ENV['LOG_CHANNEL'] = 'stderr';
     $_SERVER['LOG_CHANNEL'] = 'stderr';
@@ -72,18 +72,6 @@ try {
 
     // Bind storage path to writable /tmp/storage
     $app->useStoragePath('/tmp/storage');
-    $app->instance('path.storage', '/tmp/storage');
-
-    // Register View and Logging providers explicitly
-    $app->register(\Illuminate\View\ViewServiceProvider::class);
-    $app->register(\Illuminate\Logging\LoggingServiceProvider::class);
-
-    // Override config values at runtime
-    $config = $app->make('config');
-    $config->set('logging.default', 'stderr');
-    $config->set('view.compiled', '/tmp/storage/framework/views');
-    $config->set('database.default', 'sqlite');
-    $config->set('database.connections.sqlite.database', '/tmp/database.sqlite');
 
     // 6. Handle HTTP Request using Laravel Kernel
     $kernel = $app->make(Kernel::class);
