@@ -40,6 +40,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Rute Login & Register
     Route::get('login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('login.post');
+    Route::get('register', [AuthController::class, 'showRegister']);
+    Route::post('register', [AuthController::class, 'register']);
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
     // Mengamankan Route Administrasi di balik tembok (Middleware)
