@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EventCertificateMail;
 
 class CheckinController extends Controller
 {
@@ -37,9 +39,16 @@ class CheckinController extends Controller
             return back()->with('error', '⛔ TIKET TIDAK VALID / BELUM LUNAS! Status tiket saat ini: ' . strtoupper($transaction->status));
         }
 
-        // Tandai tiket sebagai sudah digunakan
+        // 1. Tandai tiket sebagai sudah digunakan
         $transaction->update(['status' => 'used']);
 
-        return back()->with('success', '✅ CHECK-IN BERHASIL! Tiket atas nama ' . $transaction->customer_name . ' (' . ($transaction->event ? $transaction->event->title : 'Event') . ') Valid. Silakan masuk!');
+        // 2. Terbitkan & Kirim E-Certificate Kehadiran Otomatis ke Email Peserta
+        try {
+            Mail::to($transaction->customer_email)->send(new EventCertificateMail($transaction));
+        } catch (\Exception $e) {
+            \Log::error('Gagal mengirim E-Certificate: ' . $e->getMessage());
+        }
+
+        return back()->with('success', '✅ CHECK-IN BERHASIL! Tiket atas nama ' . $transaction->customer_name . ' (' . ($transaction->event ? $transaction->event->title : 'Event') . ') Valid. E-Certificate Kehadiran telah dilayangkan ke email peserta!');
     }
 }
