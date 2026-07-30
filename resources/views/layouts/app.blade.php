@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -14,8 +14,8 @@
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
         }
     </style>
     <!-- PWA Config -->
@@ -25,19 +25,19 @@
 
 <body class="bg-slate-50 text-slate-900">
 
-    <!-- Navigation -->
-    <nav
-        class="glass sticky top-8 z-40 mx-4 mt-4 px-6 py-4 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center">
-        <div class="flex items-center gap-2">
+    <!-- Navigation Header (Auto Hides on Scroll Down) -->
+    <nav id="navbar"
+        class="glass sticky top-4 z-50 mx-4 px-6 py-4 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center transition-transform duration-300">
+        <a href="/" class="flex items-center gap-2">
             <div
                 class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
                 AH</div>
             <span class="text-xl font-bold tracking-tight">AmikomEventHub</span>
-        </div>
+        </a>
         <div class="hidden md:flex gap-8 font-medium">
-            <a href="#" class="text-indigo-600">Jelajahi</a>
-            <a href="#" class="hover:text-indigo-600 transition">Kategori</a>
-            <a href="#" class="hover:text-indigo-600 transition">Tentang Kami</a>
+            <a href="/#events" class="hover:text-indigo-600 transition">Jelajahi</a>
+            <a href="/#categories" class="hover:text-indigo-600 transition">Kategori</a>
+            <a href="/#about" class="hover:text-indigo-600 transition">Tentang Kami</a>
         </div>
         <div class="flex items-center gap-3">
             @if(auth()->check())
@@ -89,20 +89,19 @@
             <div>
                 <h4 class="text-white font-bold mb-6">Navigasi</h4>
                 <ul class="space-y-4">
-                    <li><a href="#" class="hover:text-white transition">Home</a></li>
-                    <li><a href="#" class="hover:text-white transition">Semua Event</a></li>
-                    <li><a href="#" class="hover:text-white transition">Cara Bayar</a></li>
+                    <li><a href="/" class="hover:text-white transition">Home</a></li>
+                    <li><a href="/#events" class="hover:text-white transition">Semua Event</a></li>
+                    <li><a href="/#about" class="hover:text-white transition">Tentang Kami</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="text-white font-bold mb-6">Kategori</h4>
                 <ul class="space-y-4">
-                    <li><a href="/?category=seminar-it" class="hover:text-white transition">Seminar</a></li>
-                    <li><a href="/?category=entertainment" class="hover:text-white transition">Entertaiment</a></li>
-                    <li><a href="/?category=seminar" class="hover:text-white transition">Seminar</a></li>
+                    <li><a href="/?category=seminar-it" class="hover:text-white transition">Seminar IT</a></li>
+                    <li><a href="/?category=entertainment" class="hover:text-white transition">Entertainment</a></li>
                     <li><a href="/?category=kompetisi" class="hover:text-white transition">Kompetisi</a></li>
-                    <li><a href="/?category=hiburan" class="hover:text-white transition">hiburan</a></li>
+                    <li><a href="/?category=hiburan" class="hover:text-white transition">Hiburan</a></li>
                 </ul>
             </div>
 
@@ -120,8 +119,24 @@
         </div>
     </footer>
 
-    <!-- Service Worker Script -->
+    <!-- Auto-hide Header JS & Service Worker Script -->
     <script>
+        // Smooth scroll hide/show header navbar
+        let lastScrollY = window.scrollY;
+        const navbar = document.getElementById('navbar');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 80 && window.scrollY > lastScrollY) {
+                // Scroll Ke Bawah -> Sembunyikan Header
+                navbar.style.transform = 'translateY(-200%)';
+            } else {
+                // Scroll Ke Atas / Di Paling Atas -> Tampilkan Header
+                navbar.style.transform = 'translateY(0)';
+            }
+            lastScrollY = window.scrollY;
+        });
+
+        // PWA Register
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').then(function(registration) {
