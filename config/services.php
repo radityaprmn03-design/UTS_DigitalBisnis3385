@@ -38,7 +38,7 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI') ?: 'https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback',
+        'redirect' => 'https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback',
     ],
 
 ];

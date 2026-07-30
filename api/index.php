@@ -25,12 +25,15 @@ if (!file_exists('/tmp/database.sqlite')) {
     }
 }
 
-// 3. Script environment fixes for Vercel Serverless routing
+// 3. Script environment fixes for Vercel Serverless routing & HTTPS
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
+$_SERVER['HTTPS'] = 'on';
+$_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
 // 4. Force environment overrides for Serverless execution
 putenv('VERCEL=1');
+putenv('APP_URL=https://uts-digital-bisnis3385-hngj-plum.vercel.app');
 putenv('APP_STORAGE=/tmp/storage');
 putenv('APP_KEY=base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=');
 putenv('APP_ENV=production');
@@ -41,6 +44,10 @@ putenv('DB_DATABASE=/tmp/database.sqlite');
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 putenv('SESSION_DRIVER=cookie');
 putenv('CACHE_STORE=array');
+putenv('GOOGLE_REDIRECT_URI=https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback');
+
+$_ENV['APP_URL'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app';
+$_SERVER['APP_URL'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app';
 
 $_ENV['APP_STORAGE'] = '/tmp/storage';
 $_SERVER['APP_STORAGE'] = '/tmp/storage';
@@ -65,6 +72,9 @@ $_SERVER['SESSION_DRIVER'] = 'cookie';
 
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
+
+$_ENV['GOOGLE_REDIRECT_URI'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback';
+$_SERVER['GOOGLE_REDIRECT_URI'] = 'https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback';
 
 // 5. Forward Vercel request to Laravel public/index.php
 require __DIR__ . '/../public/index.php';
