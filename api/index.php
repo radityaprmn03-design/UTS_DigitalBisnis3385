@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
 // 1. Prepare writable storage directories in /tmp for Vercel Serverless environment
@@ -47,13 +47,19 @@ putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 // 4. Register Autoloader & Bootstrap Laravel Application
 require __DIR__ . '/../vendor/autoload.php';
 
-/** @var Application $app */
+/** @var \Illuminate\Foundation\Application $app */
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
 // Dynamically bind storage path to writable /tmp/storage directory
 $app->useStoragePath('/tmp/storage');
 
-// 5. Capture and handle incoming HTTP Request
-$request = Request::capture();
-$response = $app->handleRequest($request);
+// 5. Handle HTTP Request using Laravel Kernel
+$kernel = $app->make(Kernel::class);
+
+$response = $kernel->handle(
+    $request = Request::capture()
+);
+
 $response->send();
+
+$kernel->terminate($request, $response);
