@@ -72,10 +72,21 @@ require __DIR__ . '/../vendor/autoload.php';
 /** @var \Illuminate\Foundation\Application $app */
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// 5. Handle HTTP Request using Kernel directly
-$kernel = $app->make(Kernel::class);
+// Register Filesystem and View providers explicitly
+$app->register(\Illuminate\Filesystem\FilesystemServiceProvider::class);
+$app->register(\Illuminate\View\ViewServiceProvider::class);
 
-$request = Request::capture();
-$response = $kernel->handle($request);
-$response->send();
-$kernel->terminate($request, $response);
+// 5. Handle HTTP Request using Kernel
+try {
+    $kernel = $app->make(Kernel::class);
+    $request = Request::capture();
+    $response = $kernel->handle($request);
+    $response->send();
+    $kernel->terminate($request, $response);
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    echo "UNDERLYING EXCEPTION CLASS: " . get_class($e) . "\n";
+    echo "UNDERLYING EXCEPTION MSG: " . $e->getMessage() . "\n\n";
+    echo $e->getTraceAsString();
+}
