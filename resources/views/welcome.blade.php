@@ -147,7 +147,7 @@
         </div>
     </section>
 
-    <!-- Trusted Partners Section (Perfect Centering & Real Amikom Organizations) -->
+    <!-- Trusted Partners Section (Always Centered & Real Amikom Organizations) -->
     <section class="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
         <div class="text-center max-w-xl mx-auto mb-16">
             <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider mb-3">Kolaborasi Terbaik</span>
