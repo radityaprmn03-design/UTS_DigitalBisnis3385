@@ -5,6 +5,10 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
+$defaultLogPath = (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || getenv('VERCEL'))
+    ? '/tmp/storage/logs/laravel.log'
+    : storage_path('logs/laravel.log');
+
 return [
 
     /*
@@ -18,7 +22,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'stderr'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,20 +58,20 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'stderr')),
             'ignore_exceptions' => false,
         ],
 
         'single' => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => $defaultLogPath,
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => $defaultLogPath,
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
@@ -124,7 +128,7 @@ return [
         ],
 
         'emergency' => [
-            'path' => storage_path('logs/laravel.log'),
+            'path' => $defaultLogPath,
         ],
 
     ],
