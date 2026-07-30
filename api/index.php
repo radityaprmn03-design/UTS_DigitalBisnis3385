@@ -4,7 +4,13 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Http\Request;
 
 try {
-    // 1. Prepare writable storage directories in /tmp for Vercel Serverless environment
+    // 1. Clear any stale bootstrap cache files
+    @unlink(__DIR__ . '/../bootstrap/cache/services.php');
+    @unlink(__DIR__ . '/../bootstrap/cache/packages.php');
+    @unlink(__DIR__ . '/../bootstrap/cache/config.php');
+    @unlink(__DIR__ . '/../bootstrap/cache/routes.php');
+
+    // 2. Prepare writable storage directories in /tmp for Vercel Serverless environment
     $storageDirs = [
         '/tmp/storage/app/public',
         '/tmp/storage/framework/cache/data',
@@ -19,7 +25,7 @@ try {
         }
     }
 
-    // 2. Copy SQLite database template to /tmp if not already present
+    // 3. Copy SQLite database template to /tmp if not already present
     if (!file_exists('/tmp/database.sqlite')) {
         if (file_exists(__DIR__ . '/../database/database.sqlite')) {
             copy(__DIR__ . '/../database/database.sqlite', '/tmp/database.sqlite');
@@ -28,13 +34,13 @@ try {
         }
     }
 
-    // 3. Script environment fixes for Vercel Serverless routing
+    // 4. Script environment fixes for Vercel Serverless routing
     $_SERVER['SCRIPT_NAME'] = '/index.php';
     $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
     $_SERVER['VERCEL'] = '1';
     $_ENV['VERCEL'] = '1';
 
-    // 4. Force environment overrides for Serverless execution
+    // 5. Force environment overrides for Serverless execution
     putenv('VERCEL=1');
     putenv('APP_STORAGE=/tmp/storage');
     putenv('APP_KEY=base64:CZEnlThvyh/lnmIYamboeY5jOVJoylUQqJFGRDKNIiA=');
@@ -71,13 +77,13 @@ try {
     $_ENV['CACHE_STORE'] = 'array';
     $_SERVER['CACHE_STORE'] = 'array';
 
-    // 5. Register Autoloader & Bootstrap Laravel Application
+    // 6. Register Autoloader & Bootstrap Laravel Application
     require __DIR__ . '/../vendor/autoload.php';
 
     /** @var \Illuminate\Foundation\Application $app */
     $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-    // 6. Handle HTTP Request using Laravel Kernel
+    // 7. Handle HTTP Request using Laravel Kernel
     $kernel = $app->make(Kernel::class);
 
     $response = $kernel->handle(
