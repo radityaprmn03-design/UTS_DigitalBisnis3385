@@ -147,51 +147,36 @@
         </div>
     </section>
 
-    <!-- Trusted Partners Section (Redesigned & Premium) -->
+    <!-- Trusted Partners Section (Perfect Centering & Real Amikom Organizations) -->
     <section class="max-w-7xl mx-auto px-6 py-20 border-t border-slate-100">
         <div class="text-center max-w-xl mx-auto mb-16">
             <span class="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold uppercase tracking-wider mb-3">Kolaborasi Terbaik</span>
             <h2 class="text-4xl font-extrabold text-slate-800 leading-tight">Partner & Sponsor Resmi</h2>
-            <p class="text-sm text-slate-500 mt-2">Platform kami didukung oleh berbagai instansi, perusahaan, dan komunitas terpercaya di Indonesia.</p>
+            <p class="text-sm text-slate-500 mt-2">Platform kami didukung oleh berbagai komunitas, UKM, dan instansi terpercaya di Amikom.</p>
         </div>
 
-        <!-- Grid Partner Badges -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center justify-items-center">
+        <!-- Flexbox Container for Perfect Centering -->
+        <div class="flex flex-wrap justify-center gap-6 items-center max-w-6xl mx-auto">
             @php
-                $defaultPartners = [
-                    ['name' => 'Universitas AMIKOM', 'icon' => '🎓', 'color' => 'from-indigo-500 to-purple-600'],
-                    ['name' => 'Midtrans Payment', 'icon' => '💳', 'color' => 'from-blue-500 to-cyan-500'],
-                    ['name' => 'Google Cloud', 'icon' => '☁️', 'color' => 'from-emerald-500 to-teal-600'],
-                    ['name' => 'Vercel Serverless', 'icon' => '🚀', 'color' => 'from-slate-800 to-slate-950'],
-                    ['name' => 'GitHub Education', 'icon' => '🐙', 'color' => 'from-purple-600 to-pink-600'],
-                    ['name' => 'Telkom Indonesia', 'icon' => '📡', 'color' => 'from-rose-500 to-red-600'],
+                $realPartners = [
+                    ['name' => 'WCS Amikom', 'subtitle' => 'Web Community System', 'icon' => '🌐', 'color' => 'from-indigo-600 to-blue-600'],
+                    ['name' => 'Abysena Tech', 'subtitle' => 'Technology Partner', 'icon' => '⚡', 'color' => 'from-purple-600 to-pink-600'],
+                    ['name' => 'AMCC', 'subtitle' => 'Amikom Computer Club', 'icon' => '💻', 'color' => 'from-blue-600 to-cyan-500'],
+                    ['name' => 'KOMA Amikom', 'subtitle' => 'Komunitas Multimedia', 'icon' => '🎬', 'color' => 'from-amber-500 to-orange-600'],
+                    ['name' => 'FOSSIL Amikom', 'subtitle' => 'Open Source League', 'icon' => '🐧', 'color' => 'from-emerald-500 to-teal-600'],
+                    ['name' => 'BEM Amikom', 'subtitle' => 'Badan Eksekutif Mhs', 'icon' => '🏛️', 'color' => 'from-rose-500 to-red-600'],
                 ];
             @endphp
 
-            @if(count($partners) > 0)
-                @foreach($partners as $index => $partner)
-                    @php
-                        $preset = $defaultPartners[$index % count($defaultPartners)];
-                    @endphp
-                    <div class="w-full bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-200/80 hover:border-indigo-500/40 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer relative overflow-hidden">
-                        <div class="w-14 h-14 bg-gradient-to-tr {{ $preset['color'] }} rounded-2xl flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
-                            {{ $preset['icon'] }}
-                        </div>
-                        <span class="text-xs font-extrabold text-slate-700 group-hover:text-indigo-600 text-center uppercase tracking-wide truncate w-full transition">{{ $partner->name }}</span>
-                        <span class="text-[10px] font-bold text-slate-400 mt-0.5">Verified Partner</span>
+            @foreach($realPartners as $partner)
+                <div class="w-[170px] sm:w-[190px] bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-200/80 hover:border-indigo-500/40 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+                    <div class="w-14 h-14 bg-gradient-to-tr {{ $partner['color'] }} rounded-2xl flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
+                        {{ $partner['icon'] }}
                     </div>
-                @endforeach
-            @else
-                @foreach($defaultPartners as $preset)
-                    <div class="w-full bg-white rounded-3xl p-6 flex flex-col items-center justify-center border border-slate-200/80 hover:border-indigo-500/40 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer relative overflow-hidden">
-                        <div class="w-14 h-14 bg-gradient-to-tr {{ $preset['color'] }} rounded-2xl flex items-center justify-center text-white text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
-                            {{ $preset['icon'] }}
-                        </div>
-                        <span class="text-xs font-extrabold text-slate-700 group-hover:text-indigo-600 text-center uppercase tracking-wide truncate w-full transition">{{ $preset['name'] }}</span>
-                        <span class="text-[10px] font-bold text-slate-400 mt-0.5">Official Partner</span>
-                    </div>
-                @endforeach
-            @endif
+                    <span class="text-xs font-black text-slate-800 group-hover:text-indigo-600 text-center uppercase tracking-wide truncate w-full transition">{{ $partner['name'] }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 mt-1 text-center truncate w-full">{{ $partner['subtitle'] }}</span>
+                </div>
+            @endforeach
         </div>
     </section>
 
