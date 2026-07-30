@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
@@ -26,169 +27,160 @@ class CheckoutController extends Controller
             'customer_phone' => 'required|string|max:20',
         ]);
 
-        // 2. Cegah Check-out Jika Tiket Habis
-        if ($event->stock <= 0) {
-            return back()->with('error', 'Mohon maaf, tiket untuk acara ini sudah habis.');
-        }
+        // 2. Transaksi Atomik: Tahan (Reserve) Stok Tiket Sesaat Klik Checkout (Anti-Race Condition Best Practice)
+        return DB::transaction(function () use ($request, $event) {
+            // Lock event row for update (mencegah race condition)
+            $lockedEvent = Event::where('id', $event->id)->lockForUpdate()->first();
 
-        // 3. Generate Kode TRX (Unik)
-        $orderId = 'TRX-' . time() . '-' . Str::random(5);
-        
-        // Logika Kode Kupon / Voucher Diskon
-        $basePrice = $event->price;
-        $discount = 0;
-        $couponCode = strtoupper(trim($request->input('coupon_code', '')));
-
-        if (!empty($couponCode)) {
-            if ($couponCode === 'MAHASISWA50') {
-                $discount = $basePrice * 0.5; // Diskon 50%
-            } elseif ($couponCode === 'AMIKOM20') {
-                $discount = min(20000, $basePrice); // Diskon Rp 20.000
-            } elseif ($couponCode === 'FREEPASS') {
-                $discount = $basePrice; // Diskon 100%
-            } else {
-                return back()->with('error', 'Kode kupon / voucher "' . $couponCode . '" tidak valid atau sudah kadaluarsa.')->withInput();
+            if (!$lockedEvent || $lockedEvent->stock <= 0) {
+                return back()->with('error', 'Mohon maaf, tiket untuk acara ini sudah habis atau sedang ditahan pembeli lain.');
             }
-        }
 
-        $finalPrice = max(0, $basePrice - $discount);
+            // 3. Langsung TAHAN (Reserve) stok tiket -1
+            $lockedEvent->decrement('stock');
 
-        // Cek Acara Gratis / Diskon 100% (Bypass Transaksi)
-        if ($finalPrice == 0) {
+            // 4. Generate Kode TRX (Unik)
+            $orderId = 'TRX-' . time() . '-' . Str::random(5);
+            
+            // Logika Kode Kupon / Voucher Diskon
+            $basePrice = $lockedEvent->price;
+            $discount = 0;
+            $couponCode = strtoupper(trim($request->input('coupon_code', '')));
+
+            if (!empty($couponCode)) {
+                if ($couponCode === 'MAHASISWA50') {
+                    $discount = $basePrice * 0.5; // Diskon 50%
+                } elseif ($couponCode === 'AMIKOM20') {
+                    $discount = min(20000, $basePrice); // Diskon Rp 20.000
+                } elseif ($couponCode === 'FREEPASS') {
+                    $discount = $basePrice; // Diskon 100%
+                } else {
+                    // Kembalikan stok yang ditahan jika kupon tidak valid
+                    $lockedEvent->increment('stock');
+                    return back()->with('error', 'Kode kupon / voucher "' . $couponCode . '" tidak valid atau sudah kadaluarsa.')->withInput();
+                }
+            }
+
+            $finalPrice = max(0, $basePrice - $discount);
+
+            // Cek Acara Gratis / Diskon 100% (Bypass Transaksi)
+            if ($finalPrice == 0) {
+                $transaction = Transaction::create([
+                    'event_id' => $lockedEvent->id,
+                    'order_id' => $orderId,
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $request->customer_phone,
+                    'total_price' => 0,
+                    'status' => 'success', // Langsung Sukses
+                ]);
+
+                // Kirim Email E-Ticket
+                try {
+                    \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
+                        ->send(new \App\Mail\EventTicketMail($transaction));
+                } catch (\Exception $e) {
+                    \Log::error('Gagal mengirim email E-Ticket acara gratis: ' . $e->getMessage());
+                }
+
+                return redirect()->route('checkout.success', $transaction->order_id);
+            }
+
+            $totalPrice = $finalPrice + 5000; // Biaya admin
+
+            // 5. Merekam Transaksi dengan Status 'reserved' & Waktu Kadaluarsa 15 Menit
             $transaction = Transaction::create([
-                'event_id' => $event->id,
+                'event_id' => $lockedEvent->id,
                 'order_id' => $orderId,
                 'customer_name' => $request->customer_name,
                 'customer_email' => $request->customer_email,
                 'customer_phone' => $request->customer_phone,
-                'total_price' => 0,
-                'status' => 'success', // Langsung Sukses
+                'total_price' => $totalPrice,
+                'status' => 'Pending', // Status Reserved Tiket Penahanan
             ]);
 
-            // Kurangi stok
-            $event->decrement('stock');
+            // Integrasi Midtrans
+            \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+            \Midtrans\Config::$isProduction = false;
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
 
-            // Kirim Email E-Ticket
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $orderId,
+                    'gross_amount' => $totalPrice,
+                ],
+                'customer_details' => [
+                    'first_name' => $request->customer_name,
+                    'email' => $request->customer_email,
+                    'phone' => $request->customer_phone,
+                ],
+            ];
+
             try {
-                \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
-                    ->send(new \App\Mail\EventTicketMail($transaction));
+                $snapToken = \Midtrans\Snap::getSnapToken($params);
+                $transaction->update(['snap_token' => $snapToken]);
+                return redirect()->route('checkout.payment', $transaction->order_id);
             } catch (\Exception $e) {
-                \Log::error('Gagal mengirim email E-Ticket acara gratis: ' . $e->getMessage());
+                // Kembalikan stok jika gagal snap token
+                $lockedEvent->increment('stock');
+                return back()->with('error', 'Gagal memproses pembayaran jaringan: ' . $e->getMessage());
             }
-
-            return redirect()->route('checkout.success', $transaction->order_id);
-        }
-
-        $totalPrice = $finalPrice + 5000; // Menambahkan biaya admin (dummy)
-
-        // 4. Merekam Transaksi ke Database
-        $transaction = Transaction::create([
-            'event_id' => $event->id,
-            'order_id' => $orderId,
-            'customer_name' => $request->customer_name,
-            'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'total_price' => $totalPrice,
-            'status' => 'Pending', // Status Awal
-        ]);
-
-        // --- INTEGRASI SNAP MIDTRANS ---
-        
-        // Konfigurasi Kredensial Environment Midtrans
-        \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
-        \Midtrans\Config::$isProduction = false; // Mode Sandbox!
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
-
-        // Susun Paket Array Data Transaksi
-        $params = [
-            'transaction_details' => [
-                'order_id' => $orderId,
-                'gross_amount' => $totalPrice,
-            ],
-            'customer_details' => [
-                'first_name' => $request->customer_name,
-                'email' => $request->customer_email,
-                'phone' => $request->customer_phone,
-            ],
-        ];
-
-        try {
-            // Perintah Tembak Generate Snap Token
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
-            
-            // Update rekaman kita bahwa transaksi terkait sudah memiliki id token pelunasan
-            $transaction->update(['snap_token' => $snapToken]);
-            
-            // Redirect ke halaman antarmuka pembayaran final pelanggan
-            return redirect()->route('checkout.payment', $transaction->order_id);
-            
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memproses pembayaran jaringan: ' . $e->getMessage());
-        }
+        });
     }
 
     public function payment($order_id)
     {
-         // Mengambil daftar kategori untuk keperluan menu footer
          $categories = \App\Models\Category::all();
-
          $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
          return view('checkout.payment', compact('transaction','categories'));
     }
 
-        public function success($order_id)
+    public function success($order_id)
     {
-        // Mengambil daftar kategori untuk keperluan menu footer
         $categories = \App\Models\Category::all();
-
         $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
         
-        // Konfigurasi Midtrans untuk mengecek status transaksi langsung ke API
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
         \Midtrans\Config::$isProduction = false;
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
 
         if ($transaction->total_price == 0) {
-            // Bypass Midtrans check for free events
             return view('checkout.success', compact('transaction', 'categories'));
         }
 
         try {
-            // Mengecek status pesanan secara mandiri (Bypass)
             $status = \Midtrans\Transaction::status($order_id);
             
             if ($status) {
-                // Mengambil nilai status transaksi
                 $trx_status = is_array($status) ? ($status['transaction_status'] ?? '') : ($status->transaction_status ?? '');
                 
-                // Jika API Midtrans mengonfirmasi bahwa transaksi telah berhasil (settlement / capture)
                 if (in_array($trx_status, ['settlement', 'capture'])) {
-                    // Hanya lakukan update jika status di database lokal masih 'pending' (indikasi Webhook tidak masuk)
                     if (strtolower($transaction->status) === 'pending') {
                         $transaction->update(['status' => 'success']);
                         
-                        if ($transaction->event && $transaction->event->stock > 0) {
-                            $transaction->event->stock = $transaction->event->stock - 1;
-                            $transaction->event->save();
-                            
-                            try {
-                                \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
-                                    ->send(new \App\Mail\EventTicketMail($transaction));
-                            } catch (\Exception $e) {
-                                \Log::error('Gagal mengirim email E-Ticket secara manual (Bypass): ' . $e->getMessage());
-                            }
+                        try {
+                            \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
+                                ->send(new \App\Mail\EventTicketMail($transaction));
+                        } catch (\Exception $e) {
+                            \Log::error('Gagal mengirim email E-Ticket secara manual: ' . $e->getMessage());
+                        }
+                    }
+                } elseif (in_array($trx_status, ['expire', 'cancel', 'deny'])) {
+                    // Pelepasan Stok Tiket (+1) jika pembayaran kadaluarsa/batal
+                    if (strtolower($transaction->status) === 'pending') {
+                        $transaction->update(['status' => 'expired']);
+                        if ($transaction->event) {
+                            $transaction->event->increment('stock');
                         }
                     }
                 }
             }
         } catch (\Exception $e) {
-            // Jika terjadi error dari API Midtrans (transaksi tidak valid), kembalikan ke beranda
             return redirect()->route('home')->with('error', 'Transaksi tidak ditemukan atau gagal diproses oleh sistem pembayaran.');
         }
 
         return view('checkout.success', compact('transaction', 'categories'));
     }
 }
-

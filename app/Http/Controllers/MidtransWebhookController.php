@@ -18,7 +18,6 @@ class MidtransWebhookController extends Controller
             return $this->jsonResponse(['message' => 'Invalid payload'], 400);
         }
 
-        // Mencari ID transaksi tersebut di database lokal kita
         $transaction = Transaction::with('event')->where('order_id', $orderId)->first();
 
         if (!$transaction) {
@@ -28,12 +27,11 @@ class MidtransWebhookController extends Controller
             return $this->jsonResponse(['message' => 'Transaction not found'], 404);
         }
 
-        // Cegah proses berulang jika status sudah lunas/sukses
         if ($transaction->status === 'settlement' || $transaction->status === 'success') {
             return $this->jsonResponse(['message' => 'Already processed']);
         }
 
-        // Logika Penerjemahan Status Midtrans API
+        // Logika Penerjemahan Status Midtrans API & Reserved Ticket Release
         if ($transactionStatus == 'capture') {
             if ($fraudStatus == 'challenge') {
                 $transaction->status = 'challenge';
@@ -42,10 +40,16 @@ class MidtransWebhookController extends Controller
                 $this->processSuccess($transaction);
             }
         } else if ($transactionStatus == 'settlement') {
-            $transaction->status = 'settlement';
+            $transaction->status = 'success';
             $this->processSuccess($transaction);
         } else if (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
-            $transaction->status = 'failed';
+            // Pelepasan Stok Tiket (Reserved Ticket (+1)) jika pembayaran expired/batal
+            if ($transaction->status === 'pending' || $transaction->status === 'Pending') {
+                if ($transaction->event) {
+                    $transaction->event->increment('stock');
+                }
+            }
+            $transaction->status = 'expired';
         } else if ($transactionStatus == 'pending') {
             $transaction->status = 'pending';
         }
@@ -61,23 +65,13 @@ class MidtransWebhookController extends Controller
         return $response;
     }
 
-       private function processSuccess(Transaction $transaction)
+    private function processSuccess(Transaction $transaction)
     {
-        $event = $transaction->event;
-        
-        // Jika tiket masih ada dan terhubung dengan data event, kurangi jumlahnya sebanyak 1
-        if ($event && $event->stock > 0) {
-            $event->stock = $event->stock - 1;
-            $event->save();
-            
-            // Mengirimkan email E-Ticket ke pelanggan
-            try {
-                \Illuminate\Support\Facades\Mail::to($transaction->customer_email)->send(new \App\Mail\EventTicketMail($transaction));
-            } catch (\Exception $e) {
-                \Log::error('Gagal mengirim email E-Ticket: ' . $e->getMessage());
-            }
-        } else {
-            \Log::warning('Stock habis setelah pembayaran berhasil (Perlu proses refund opsional). Order: ' . $transaction->order_id);
+        // Stok sudah ditahan saat checkout. Kirim E-Ticket ke email pelanggan.
+        try {
+            \Illuminate\Support\Facades\Mail::to($transaction->customer_email)->send(new \App\Mail\EventTicketMail($transaction));
+        } catch (\Exception $e) {
+            \Log::error('Gagal mengirim email E-Ticket: ' . $e->getMessage());
         }
     }
 }
