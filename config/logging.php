@@ -5,9 +5,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
-$defaultLogPath = (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL']) || getenv('VERCEL'))
-    ? '/tmp/storage/logs/laravel.log'
-    : storage_path('logs/laravel.log');
+$logPath = env('LOG_PATH', '/tmp/storage/logs/laravel.log');
 
 return [
 
@@ -64,14 +62,14 @@ return [
 
         'single' => [
             'driver' => 'single',
-            'path' => $defaultLogPath,
+            'path' => $logPath,
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
 
         'daily' => [
             'driver' => 'daily',
-            'path' => $defaultLogPath,
+            'path' => $logPath,
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
@@ -128,7 +126,7 @@ return [
         ],
 
         'emergency' => [
-            'path' => $defaultLogPath,
+            'path' => $logPath,
         ],
 
     ],
