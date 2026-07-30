@@ -17,7 +17,7 @@ $storageDirs = [
 
 foreach ($storageDirs as $dir) {
     if (!file_exists($dir)) {
-        @mkdir($dir, 0755, true);
+        @mkdir($dir, 0777, true);
     }
 }
 
@@ -73,11 +73,22 @@ $_SERVER['SESSION_DRIVER'] = 'cookie';
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
 
-// 6. Forward Vercel request to Laravel public/index.php inside try-catch
+// 6. Bootstrap Laravel Application
+require __DIR__ . '/../vendor/autoload.php';
+
+/** @var \Illuminate\Foundation\Application $app */
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+$app->register(\Illuminate\View\ViewServiceProvider::class);
+
 try {
-    require __DIR__ . '/../public/index.php';
+    $request = \Illuminate\Http\Request::capture();
+    $response = $app->handleRequest($request);
+    $response->send();
 } catch (\Throwable $e) {
     http_response_code(500);
     header('Content-Type: text/plain');
-    echo "VERCEL DEPLOYMENT EXCEPTION:\n" . $e->getMessage() . "\n\n" . $e->getTraceAsString();
+    echo "UNDERLYING EXCEPTION CLASS: " . get_class($e) . "\n";
+    echo "UNDERLYING EXCEPTION MSG: " . $e->getMessage() . "\n\n";
+    echo $e->getTraceAsString();
 }
