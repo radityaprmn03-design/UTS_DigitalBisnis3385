@@ -31,9 +31,9 @@ $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
 $_SERVER['HTTPS'] = 'on';
 $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
-// Safe decoders for Midtrans sandbox environment
-$midServerKey = env('MIDTRANS_SERVER_KEY') ?: base64_decode('TWlkLXNlcnZlci1zUU0tMGZiM2RhRXZXZzNHWDZqX2c2RnY=');
-$midClientKey = env('MIDTRANS_CLIENT_KEY') ?: base64_decode('TWlkLWNsaWVudC10em5Wd3BfTUNqb1hVQmpC');
+// Safe decoders for Midtrans sandbox environment (using PHP getenv instead of Laravel env helper)
+$midServerKey = getenv('MIDTRANS_SERVER_KEY') ?: base64_decode('TWlkLXNlcnZlci1zUU0tMGZiM2RhRXZXZzNHWDZqX2c2RnY=');
+$midClientKey = getenv('MIDTRANS_CLIENT_KEY') ?: base64_decode('TWlkLWNsaWVudC10em5Wd3BfTUNqb1hVQmpC');
 
 // 4. Force environment overrides for Serverless execution
 putenv('VERCEL=1');
