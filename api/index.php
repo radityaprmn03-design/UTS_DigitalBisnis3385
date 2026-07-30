@@ -1,9 +1,12 @@
 <?php
 
-// Prepare writable storage directory in /tmp for Vercel Serverless environment
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+// 1. Prepare writable storage directories in /tmp for Vercel Serverless environment
 $storageDirs = [
-    '/tmp/storage/app',
-    '/tmp/storage/framework/cache',
+    '/tmp/storage/app/public',
+    '/tmp/storage/framework/cache/data',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/framework/views',
     '/tmp/storage/logs',
@@ -15,18 +18,7 @@ foreach ($storageDirs as $dir) {
     }
 }
 
-// Redirect Monolog output to stderr (fixes Read-only file system error on logs)
-putenv('LOG_CHANNEL=stderr');
-
-// Redirect cache and compiled views to /tmp
-putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
-putenv('APP_SERVICES_CACHE=/tmp/services.php');
-putenv('APP_PACKAGES_CACHE=/tmp/packages.php');
-putenv('APP_CONFIG_CACHE=/tmp/config.php');
-putenv('APP_ROUTES_CACHE=/tmp/routes.php');
-putenv('APP_EVENTS_CACHE=/tmp/events.php');
-
-// Handle SQLite database in /tmp for Serverless read-write capability
+// 2. Copy SQLite database template to /tmp if not already present
 if (!file_exists('/tmp/database.sqlite')) {
     if (file_exists(__DIR__ . '/../database/database.sqlite')) {
         copy(__DIR__ . '/../database/database.sqlite', '/tmp/database.sqlite');
@@ -34,8 +26,34 @@ if (!file_exists('/tmp/database.sqlite')) {
         touch('/tmp/database.sqlite');
     }
 }
+
+// 3. Force environment overrides for Serverless execution
+$_ENV['LOG_CHANNEL'] = 'stderr';
+$_SERVER['LOG_CHANNEL'] = 'stderr';
+putenv('LOG_CHANNEL=stderr');
+
+$_ENV['DB_CONNECTION'] = 'sqlite';
+$_SERVER['DB_CONNECTION'] = 'sqlite';
 putenv('DB_CONNECTION=sqlite');
+
+$_ENV['DB_DATABASE'] = '/tmp/database.sqlite';
+$_SERVER['DB_DATABASE'] = '/tmp/database.sqlite';
 putenv('DB_DATABASE=/tmp/database.sqlite');
 
-// Forward Vercel request to Laravel public/index.php
-require __DIR__ . '/../public/index.php';
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
+$_SERVER['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
+putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
+
+// 4. Register Autoloader & Bootstrap Laravel Application
+require __DIR__ . '/../vendor/autoload.php';
+
+/** @var Application $app */
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// Dynamically bind storage path to writable /tmp/storage directory
+$app->useStoragePath('/tmp/storage');
+
+// 5. Capture and handle incoming HTTP Request
+$request = Request::capture();
+$response = $app->handleRequest($request);
+$response->send();
