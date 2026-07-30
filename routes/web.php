@@ -15,6 +15,10 @@ Route::get('/login', function () {
     return redirect()->route('admin.login');
 })->name('login');
 
+// Registration Routes
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
 // Google Socialite Auth
 Route::get('/auth/google', [\App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google');
 Route::get('/auth/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
@@ -33,7 +37,7 @@ Route::post('/midtrans/callback', [\App\Http\Controllers\MidtransWebhookControll
 
 // Grouping untuk URL berawalan /admin
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Rute Login bebas akses
+    // Rute Login & Register
     Route::get('login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('login.post');
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -63,7 +67,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Check-in Scanner Hari-H
         Route::get('checkin', [\App\Http\Controllers\Admin\CheckinController::class, 'index'])->name('checkin.index');
         Route::post('checkin', [\App\Http\Controllers\Admin\CheckinController::class, 'process'])->name('checkin.process');
-
-
     });
 });

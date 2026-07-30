@@ -65,8 +65,11 @@
                     </button>
                 </form>
             @else
-                <a href="{{ route('login') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
-                    <span>🔑</span> Login / Masuk
+                <a href="{{ route('login') }}" class="px-4 py-2.5 text-indigo-600 hover:text-indigo-800 font-bold text-sm transition">
+                    Masuk
+                </a>
+                <a href="{{ route('register') }}" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition text-sm flex items-center gap-2">
+                    <span>✨</span> Daftar Akun
                 </a>
             @endif
         </div>

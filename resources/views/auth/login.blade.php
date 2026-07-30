@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - AmikomEventHub</title>
+    <title>Masuk - AmikomEventHub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style> body { font-family: 'Plus Jakarta Sans', sans-serif; } </style>
@@ -57,7 +57,12 @@
             Masuk Akun via Google
         </a>
 
-        <div class="mt-6 text-center">
+        <div class="mt-6 text-center text-sm font-semibold text-slate-600">
+            Belum punya akun? 
+            <a href="{{ route('register') }}" class="text-indigo-600 font-bold hover:underline">Daftar Akun Baru</a>
+        </div>
+
+        <div class="mt-4 text-center">
             <a href="/" class="text-xs font-bold text-indigo-600 hover:underline">← Kembali ke Beranda</a>
         </div>
     </div>
