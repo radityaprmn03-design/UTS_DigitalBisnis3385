@@ -1,5 +1,10 @@
 <?php
 
+// Prevent browser caching on serverless responses
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: Fri, 01 Jan 1990 00:00:00 GMT');
+
 // 1. Prepare storage and bootstrap directories in /tmp for Vercel Serverless environment
 $directories = [
     '/tmp/storage/app/public',
