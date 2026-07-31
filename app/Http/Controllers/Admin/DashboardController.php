@@ -11,17 +11,18 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $isSuperadmin = $user->role === 'superadmin';
+        $isAdmin = in_array($user->role, ['superadmin', 'admin']);
 
+        // Multi-Tenant Isolation: Tenant/Organizer only sees their own events and transactions
         $transactionsQuery = Transaction::query();
-        if (!$isSuperadmin) {
+        if (!$isAdmin) {
             $transactionsQuery->whereHas('event', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             });
         }
 
         $eventsQuery = Event::query();
-        if (!$isSuperadmin) {
+        if (!$isAdmin) {
             $eventsQuery->where('user_id', $user->id);
         }
 
