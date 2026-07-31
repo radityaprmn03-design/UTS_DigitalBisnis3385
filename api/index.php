@@ -46,7 +46,8 @@ putenv('LOG_CHANNEL=stderr');
 putenv('DB_CONNECTION=sqlite');
 putenv('DB_DATABASE=/tmp/database.sqlite');
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
-putenv('SESSION_DRIVER=cookie');
+putenv('SESSION_DRIVER=file');
+putenv('SESSION_FILE_PATH=/tmp/storage/framework/sessions');
 putenv('CACHE_STORE=array');
 putenv('GOOGLE_REDIRECT_URI=https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback');
 putenv("MIDTRANS_SERVER_KEY={$midServerKey}");
@@ -73,8 +74,11 @@ $_SERVER['DB_DATABASE'] = '/tmp/database.sqlite';
 $_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
 $_SERVER['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
 
-$_ENV['SESSION_DRIVER'] = 'cookie';
-$_SERVER['SESSION_DRIVER'] = 'cookie';
+$_ENV['SESSION_DRIVER'] = 'file';
+$_SERVER['SESSION_DRIVER'] = 'file';
+
+$_ENV['SESSION_FILE_PATH'] = '/tmp/storage/framework/sessions';
+$_SERVER['SESSION_FILE_PATH'] = '/tmp/storage/framework/sessions';
 
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
