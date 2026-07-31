@@ -31,7 +31,7 @@ $_SERVER['SCRIPT_FILENAME'] = __DIR__ . '/../public/index.php';
 $_SERVER['HTTPS'] = 'on';
 $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
 
-// Safe decoders for Midtrans sandbox environment (using PHP getenv instead of Laravel env helper)
+// Safe decoders for Midtrans sandbox environment
 $midServerKey = getenv('MIDTRANS_SERVER_KEY') ?: base64_decode('TWlkLXNlcnZlci1zUU0tMGZiM2RhRXZXZzNHWDZqX2c2RnY=');
 $midClientKey = getenv('MIDTRANS_CLIENT_KEY') ?: base64_decode('TWlkLWNsaWVudC10em5Wd3BfTUNqb1hVQmpC');
 
@@ -46,8 +46,8 @@ putenv('LOG_CHANNEL=stderr');
 putenv('DB_CONNECTION=sqlite');
 putenv('DB_DATABASE=/tmp/database.sqlite');
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
-putenv('SESSION_DRIVER=file');
-putenv('SESSION_FILE_PATH=/tmp/storage/framework/sessions');
+putenv('SESSION_DRIVER=cookie');
+putenv('SESSION_ENCRYPT=true');
 putenv('CACHE_STORE=array');
 putenv('GOOGLE_REDIRECT_URI=https://uts-digital-bisnis3385-hngj-plum.vercel.app/auth/google/callback');
 putenv("MIDTRANS_SERVER_KEY={$midServerKey}");
@@ -74,11 +74,11 @@ $_SERVER['DB_DATABASE'] = '/tmp/database.sqlite';
 $_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
 $_SERVER['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
 
-$_ENV['SESSION_DRIVER'] = 'file';
-$_SERVER['SESSION_DRIVER'] = 'file';
+$_ENV['SESSION_DRIVER'] = 'cookie';
+$_SERVER['SESSION_DRIVER'] = 'cookie';
 
-$_ENV['SESSION_FILE_PATH'] = '/tmp/storage/framework/sessions';
-$_SERVER['SESSION_FILE_PATH'] = '/tmp/storage/framework/sessions';
+$_ENV['SESSION_ENCRYPT'] = 'true';
+$_SERVER['SESSION_ENCRYPT'] = 'true';
 
 $_ENV['CACHE_STORE'] = 'array';
 $_SERVER['CACHE_STORE'] = 'array';
